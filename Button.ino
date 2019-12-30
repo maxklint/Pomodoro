@@ -1,62 +1,56 @@
-const int buttonPin = 3;
-const unsigned long longPressTime = 600;
-const unsigned long doubleClickTime = 200;
-const unsigned long doubleClickDebounceTime = 500;
+#include <RingBuf.h>
 
-int buttonState = 0;
-unsigned long lastDown = 0;
-unsigned long lastUp = 0;
-bool waitingForUp = false;
-bool waitingForDoubleClick = false;
-bool ignoreEvents = false;
+const int buttonPin = 3;
+const unsigned long buttonLongPressTime = 600;
+const unsigned long buttonDebounceTime = 50;
+const unsigned long buttonDoubleClickTime = 200;
+const unsigned long buttonDoubleClickDebounceTime = 500;
+
+RingBuf<unsigned long , 32> buttonBuf;
+RingBuf<enum InputEvent, 16> buttonOutBuf;
 
 void buttonInit() {
   pinMode(buttonPin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(buttonPin), buttonISR, CHANGE);
-  buttonState = digitalRead(buttonPin);
+  attachInterrupt(digitalPinToInterrupt(buttonPin), buttonISR, RISING);
 }
 
-void buttonUpdate() {
+enum InputEvent buttonUpdate() {
+  static unsigned long lastPress = 0;
+  static unsigned long ignoreEventsUntil = 0;
+  static bool pending = false;
+
+  unsigned long timestamp;
+  while (buttonBuf.lockedPop(timestamp)) {
+    if (timestamp <= ignoreEventsUntil) continue;
+    if (timestamp - lastPress <= buttonDebounceTime) continue;
+    pending = true;
+    if (timestamp - lastPress <= buttonDoubleClickTime) {
+      buttonOutBuf.push(BTN_EV_DOUBLE);
+      ignoreEventsUntil = timestamp + buttonDoubleClickDebounceTime;
+      pending = false;
+    }
+    lastPress = timestamp;
+  }
+
   unsigned long now = millis();
-
-  if (waitingForUp && now - lastDown > longPressTime) {
-    event = BTN_EV_LONG;
-    waitingForUp = false;
+  if (pending && now > ignoreEventsUntil) {
+    pending = false;
+    int buttonState = digitalRead(buttonPin);
+    if (buttonState == LOW && now - lastPress > buttonDoubleClickTime)
+      buttonOutBuf.push(BTN_EV_CLICK);
+    else if (buttonState == HIGH && now - lastPress > buttonLongPressTime)
+      buttonOutBuf.push(BTN_EV_LONG);
+    else
+      pending = true; // still pending
   }
 
-  if (ignoreEvents && now - lastUp > doubleClickDebounceTime) {
-    ignoreEvents = false;
-  }
-
-  if (waitingForDoubleClick && now - lastUp > doubleClickTime) {
-    event = BTN_EV_CLICK;
-    waitingForDoubleClick = false;
-  }
+  enum InputEvent outEv;
+  if (buttonOutBuf.pop(outEv))
+    return outEv;
+  else
+    return BTN_EV_NONE;
 }
 
 void buttonISR() {
-  buttonState = !buttonState;
-  if (buttonState) {
-    // press
-    if (ignoreEvents) return;
-
-    waitingForUp = true;
-    lastDown = millis();
-  } else {
-    // release
-    if (ignoreEvents) return;
-    if (!waitingForUp) return;
-
-    waitingForUp = false;
-    unsigned long now = millis();
-    if (now - lastUp < doubleClickTime) {
-      waitingForDoubleClick = false;
-      ignoreEvents = true;
-      event = BTN_EV_DOUBLE;
-    } else {
-      waitingForDoubleClick = true;
-    }
-
-    lastUp = now;
-  }
+  buttonBuf.push(millis());
 }

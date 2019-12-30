@@ -13,7 +13,6 @@ enum InputEvent {
   BTN_EV_DOUBLE,
   BTN_EV_LONG
 };
-volatile int event = BTN_EV_NONE;
 
 bool isWork = true;
 bool isPaused = true;
@@ -39,8 +38,8 @@ void setup() {
 }
 
 void loop() {
-  processInputEvent();
-  buttonUpdate();
+  enum InputEvent ev = buttonUpdate();
+  processInputEvent(ev);
 
   unsigned int mins, secs, millisecs;
   timerGet(&mins, &secs, &millisecs);
@@ -63,22 +62,19 @@ void loop() {
   }
 }
 
-void processInputEvent() {
-  switch (event)
+void processInputEvent(enum InputEvent ev) {
+  switch (ev)
   {
     case BTN_EV_CLICK:
       Serial.println("single");
       stateTransition(isWork, !isPaused, false);
-      event = BTN_EV_NONE;
       break;
     case BTN_EV_DOUBLE:
       Serial.println("double");
       stateTransition(true, true, true);
-      event = BTN_EV_NONE;
       break;
     case BTN_EV_LONG:
       Serial.println("long");
-      event = BTN_EV_NONE;
       break;
     default:
       break;
