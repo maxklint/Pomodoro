@@ -107,5 +107,4 @@ void pomoShow() {
 }
 
 void pomoHide() {
-  displayClear();
 }

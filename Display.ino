@@ -9,16 +9,13 @@ void displayInit() {
   displayDriver.setBrightness(2);
 }
 
-void displayClear() {
-  memset(displayBuffer, 0, 4);
-}
-
 void displayShowTime(unsigned int mins, unsigned int secs, bool point) {
   displayDriver.showNumberDecEx(mins, point ? 0xFF : 0, true, 2, 0);
   displayDriver.showNumberDec(secs, true, 2, 2);
 }
 
 void displayShowBar(unsigned int level) {
+  memset(displayBuffer, 0, 4);
   for (int i = 0; i < 4; i++) {
     if (level-- == 0) break;
     displayBuffer[i] = SEG_G;

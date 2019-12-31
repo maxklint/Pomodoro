@@ -64,5 +64,4 @@ void menuShow() {
 }
 
 void menuHide() {
-  displayClear();
 }
