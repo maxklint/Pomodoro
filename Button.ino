@@ -7,14 +7,14 @@ const unsigned long buttonDoubleClickTime = 200;
 const unsigned long buttonDoubleClickDebounceTime = 500;
 
 RingBuf<unsigned long , 32> buttonBuf;
-RingBuf<enum InputEvent, 16> buttonOutBuf;
+RingBuf<InputEvent, 16> buttonOutBuf;
 
 void buttonInit() {
   pinMode(buttonPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(buttonPin), buttonISR, RISING);
 }
 
-enum InputEvent buttonUpdate() {
+InputEvent buttonUpdate() {
   static unsigned long lastPress = 0;
   static unsigned long ignoreEventsUntil = 0;
   static bool pending = false;
@@ -44,7 +44,7 @@ enum InputEvent buttonUpdate() {
       pending = true; // still pending
   }
 
-  enum InputEvent outEv;
+  InputEvent outEv;
   if (buttonOutBuf.pop(outEv))
     return outEv;
   else
