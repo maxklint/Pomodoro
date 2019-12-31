@@ -1,3 +1,5 @@
+const unsigned int pomoLongBreakSession = 4;
+
 bool pomoIsWork = true;
 bool pomoIsPaused = true;
 bool pomoIsReset = true;
@@ -5,6 +7,8 @@ unsigned int pomoSession = 0;
 unsigned int pomoMins = 0;
 unsigned int pomoSecs = 0;
 unsigned int pomoMillisecs = 0;
+
+unsigned long pauseStartedAt = 0;
 
 void pomoInit() {
 }
@@ -36,12 +40,20 @@ void pomoDoubleClick() {
 }
 
 void pomoDraw() {
-  bool point;
-  if (pomoIsPaused || pomoIsReset)
-    point = true;
-  else
-    point = pomoMillisecs < 500;
-  displayShowTime(pomoMins, pomoSecs, point);
+  if (pomoIsReset) {
+    displayShowTime(pomoMins, pomoSecs, true);
+  }
+  else if (pomoIsPaused) {
+    int phase = ((millis() - pauseStartedAt) % 3000) < 1500;
+    if (phase)
+      displayShowBar(pomoSession);
+    else
+      displayShowTime(pomoMins, pomoSecs, true);
+
+  }
+  else {
+    displayShowTime(pomoMins, pomoSecs, pomoMillisecs < 500);
+  }
 }
 
 void pomoResume() {
@@ -51,6 +63,7 @@ void pomoResume() {
 }
 
 void pomoPause() {
+  pauseStartedAt = millis();
   timerPause();
   pomoIsPaused = true;
 }
@@ -59,13 +72,13 @@ void pomoStart() {
   timerPause();
 
   if (pomoIsWork) {
-    timerSet(workDurationMins, workDurationSecs);
-  } else {
     pomoSession++;
-    if (pomoSession > longBreakSession)
+    if (pomoSession > pomoLongBreakSession)
       pomoSession = 1;
 
-    if (pomoSession == longBreakSession)
+    timerSet(workDurationMins, workDurationSecs);
+  } else {
+    if (pomoSession == pomoLongBreakSession)
       timerSet(longBreakDurationMins, longBreakDurationSecs);
     else
       timerSet(breakDurationMins, breakDurationSecs);

@@ -1,20 +1,23 @@
-#include <TM1637.h>
+#include <TM1637Display.h>
 
 const int displayDioPin = 8;
 const int displayClkPin = 9;
-TM1637 displayDriver(displayClkPin, displayDioPin);
-int8_t displayTime[] = {0x00, 0x00, 0x00, 0x00};
+TM1637Display displayDriver(displayClkPin, displayDioPin);
+uint8_t displayBuffer[] = {0x00, 0x00, 0x00, 0x00};
 
 void displayInit() {
-  displayDriver.set();
-  displayDriver.init();
+  displayDriver.setBrightness(2);
 }
 
 void displayShowTime(unsigned int mins, unsigned int secs, bool point) {
-  displayTime[0] = mins / 10;
-  displayTime[1] = mins % 10;
-  displayTime[2] = secs / 10;
-  displayTime[3] = secs % 10;
-  displayDriver.display(displayTime);
-  displayDriver.point(point);
+  displayDriver.showNumberDecEx(mins, point ? 0xFF : 0, true, 2, 0);
+  displayDriver.showNumberDec(secs, true, 2, 2);
+}
+
+void displayShowBar(unsigned int level) {
+  for (int i = 0; i < 4; i++) {
+    if (level-- == 0) break;
+    displayBuffer[i] = SEG_G;
+  }
+  displayDriver.setSegments(displayBuffer);
 }

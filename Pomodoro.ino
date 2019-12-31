@@ -4,7 +4,6 @@ const unsigned int breakDurationMins = 0;
 const unsigned int breakDurationSecs = 3;
 const unsigned int longBreakDurationMins = 0;
 const unsigned int longBreakDurationSecs = 8;
-const unsigned int longBreakSession = 2;
 
 typedef enum {
   BTN_EV_NONE = 0,
