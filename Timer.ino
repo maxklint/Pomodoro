@@ -1,7 +1,9 @@
 #include <TimerOne.h>
 
 // NOTE: MUST to be a divisor of 1000 for the code below to work
-const unsigned int timerInterval = 50; // every 50ms
+const unsigned int timerInterval = 1; // every 1ms
+
+volatile bool timerIsPaused = true;
 
 volatile unsigned int timerMins = 0;
 volatile unsigned int timerSecs = 0;
@@ -9,7 +11,6 @@ volatile unsigned int timerMillisecs = 0;
 
 void timerInit() {
   Timer1.initialize(timerInterval * 1000);
-  Timer1.stop();
   Timer1.attachInterrupt(timerISR);
 }
 
@@ -20,11 +21,11 @@ void timerSet(unsigned int mins, unsigned int secs) {
 }
 
 void timerStart() {
-  Timer1.start();
+  timerIsPaused = false;
 }
 
 void timerPause() {
-  Timer1.stop();
+  timerIsPaused = true;
 }
 
 void timerGet(unsigned int *mins, unsigned int *secs, unsigned int *millisecs) {
@@ -34,6 +35,11 @@ void timerGet(unsigned int *mins, unsigned int *secs, unsigned int *millisecs) {
 }
 
 void timerISR() {
+  ledsUpdate();
+
+  if (timerIsPaused)
+    return;
+
   if (timerMillisecs == 0 && timerSecs == 0 && timerMins == 0) {
     timerPause();
     return;
