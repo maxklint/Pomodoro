@@ -1,8 +1,8 @@
 const int buzzerPin = 5;
 
-int buzzerMelodyWork[][2] = {{6000, 100}, {0, 100}, {6000, 100}, {0, 100}, {0, 0}};
-int buzzerMelodyBreak[][2] = {{6000, 100}, {0, 100}, {6000, 100}, {0, 100}, {0, 0}};
-int buzzerMelodyLongBreak[][2] = {{6000, 100}, {0, 100}, {6000, 100}, {0, 100}, {0, 0}};
+int buzzerMelodyWork[][2] = {{7000, 50}, {0, 0}};
+int buzzerMelodyBreak[][2] = {{7000, 50}, {0, 150}, {7000, 50}, {0, 0}};
+int buzzerMelodyLongBreak[][2] = {{7000, 50}, {0, 150}, {7000, 50}, {0, 150}, {7000, 50}, {0, 0}};
 int (*buzzerCurrentMelody)[2] = NULL;
 int buzzerCurrentNote = 0;
 unsigned long buzzerNoteStarted = 0;
@@ -16,7 +16,7 @@ void buzzerUpdate() {
 
   unsigned long now = millis();
   if (now - buzzerNoteStarted > buzzerCurrentMelody[buzzerCurrentNote][1]) {
-    buzzerPlayNote(buzzerCurrentMelody, buzzerCurrentNote++);
+    buzzerPlayNote(buzzerCurrentMelody, ++buzzerCurrentNote);
   }
 
 }
@@ -33,7 +33,7 @@ void buzzerPlayNote(int (*melody)[2], int note) {
 
   buzzerNoteStarted = millis();
   if (freq)
-    tone(buzzerPin, freq);
+    tone(buzzerPin, freq, dur);
   else
     noTone(buzzerPin);
 }

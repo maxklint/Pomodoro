@@ -82,11 +82,17 @@ void pomoStart() {
       pomoSession = 1;
 
     timerSet(pomoWorkDuration, 0);
+
+    if (pomoSound) buzzerWork();
   } else {
-    if (pomoSession == pomoLongBreakSession)
+    if (pomoSession == pomoLongBreakSession) {
       timerSet(pomoLongBreakDuration, 0);
-    else
+      if (pomoSound) buzzerLongBreak();
+    }
+    else {
       timerSet(pomoBreakDuration, 0);
+      if (pomoSound) buzzerBreak();
+    }
   }
 
   pomoResume();

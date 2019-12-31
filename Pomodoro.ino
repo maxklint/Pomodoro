@@ -11,10 +11,6 @@ const unsigned long redrawInterval = 50;
 unsigned long lastRedraw = 0;
 
 void setup() {
-  Serial.begin(9600);
-  while (!Serial);
-  Serial.println("startup");
-
   buttonInit();
   displayInit();
   ledsInit();
@@ -26,8 +22,6 @@ void setup() {
 
   pomoShow();
   pomoReset();
-
-  Serial.println("initialization complete");
 }
 
 void loop() {
@@ -38,17 +32,14 @@ void loop() {
   switch (ev)
   {
     case BTN_EV_CLICK:
-      Serial.println("single");
       if (isMenuOpen) menuClick();
       else pomoClick();
       break;
     case BTN_EV_DOUBLE:
-      Serial.println("double");
       if (isMenuOpen) menuDoubleClick();
       else pomoDoubleClick();
       break;
     case BTN_EV_LONG:
-      Serial.println("long");
       isMenuOpen = !isMenuOpen;
       if (isMenuOpen) {
         menuShow();
@@ -63,6 +54,8 @@ void loop() {
   // regular state update
   menuUpdate();
   pomoUpdate();
+
+  buzzerUpdate();
 
   // redraw
   unsigned long now = millis();
