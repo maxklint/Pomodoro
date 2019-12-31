@@ -44,7 +44,7 @@ void pomoDraw() {
     displayShowTime(pomoMins, pomoSecs, true);
   }
   else if (pomoIsPaused) {
-    int phase = ((millis() - pauseStartedAt) % 3000) < 1500;
+    int phase = ((millis() - pauseStartedAt) % 2000) < 1000;
     if (phase)
       displayShowBar(pomoSession);
     else
@@ -99,4 +99,13 @@ void pomoReset() {
   pomoIsPaused = true;
   pomoIsReset = true;
   pomoSession = 0;
+}
+
+
+void pomoShow() {
+  pauseStartedAt = millis();
+}
+
+void pomoHide() {
+  displayClear();
 }

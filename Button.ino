@@ -4,7 +4,7 @@ const int buttonPin = 3;
 const unsigned long buttonLongPressTime = 600;
 const unsigned long buttonDebounceTime = 50;
 const unsigned long buttonDoubleClickTime = 200;
-const unsigned long buttonDoubleClickDebounceTime = 500;
+const unsigned long buttonEventDebounceTime = 500;
 
 RingBuf<unsigned long , 32> buttonBuf;
 RingBuf<InputEvent, 16> buttonOutBuf;
@@ -26,7 +26,7 @@ InputEvent buttonUpdate() {
     pending = true;
     if (timestamp - lastPress <= buttonDoubleClickTime) {
       buttonOutBuf.push(BTN_EV_DOUBLE);
-      ignoreEventsUntil = timestamp + buttonDoubleClickDebounceTime;
+      ignoreEventsUntil = timestamp + buttonEventDebounceTime;
       pending = false;
     }
     lastPress = timestamp;
@@ -35,13 +35,16 @@ InputEvent buttonUpdate() {
   unsigned long now = millis();
   if (pending && now > ignoreEventsUntil) {
     pending = false;
+    ignoreEventsUntil = timestamp + buttonEventDebounceTime;
     int buttonState = digitalRead(buttonPin);
     if (buttonState == LOW && now - lastPress > buttonDoubleClickTime)
       buttonOutBuf.push(BTN_EV_CLICK);
     else if (buttonState == HIGH && now - lastPress > buttonLongPressTime)
       buttonOutBuf.push(BTN_EV_LONG);
-    else
+    else {
       pending = true; // still pending
+      ignoreEventsUntil = 0;
+    }
   }
 
   InputEvent outEv;

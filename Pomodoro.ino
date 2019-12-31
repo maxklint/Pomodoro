@@ -54,6 +54,13 @@ void loop() {
     case BTN_EV_LONG:
       Serial.println("long");
       isMenuOpen = !isMenuOpen;
+      if (isMenuOpen) {
+        menuShow();
+        pomoHide();
+      } else {
+        menuHide();
+        pomoShow();
+      }
       break;
   }
 
