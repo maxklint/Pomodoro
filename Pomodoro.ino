@@ -1,9 +1,4 @@
-const unsigned int workDurationMins = 0;
-const unsigned int workDurationSecs = 5;
-const unsigned int breakDurationMins = 0;
-const unsigned int breakDurationSecs = 3;
-const unsigned int longBreakDurationMins = 0;
-const unsigned int longBreakDurationSecs = 8;
+#include <EEPROM.h>
 
 typedef enum {
   BTN_EV_NONE = 0,
@@ -28,7 +23,8 @@ void setup() {
 
   menuInit();
   pomoInit();
-  
+
+  pomoShow();
   pomoReset();
 
   Serial.println("initialization complete");

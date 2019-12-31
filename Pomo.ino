@@ -8,6 +8,11 @@ unsigned int pomoMins = 0;
 unsigned int pomoSecs = 0;
 unsigned int pomoMillisecs = 0;
 
+unsigned int pomoWorkDuration = 0;
+unsigned int pomoBreakDuration = 0;
+unsigned int pomoLongBreakDuration = 0;
+bool pomoSound = false;
+
 unsigned long pauseStartedAt = 0;
 
 void pomoInit() {
@@ -76,12 +81,12 @@ void pomoStart() {
     if (pomoSession > pomoLongBreakSession)
       pomoSession = 1;
 
-    timerSet(workDurationMins, workDurationSecs);
+    timerSet(pomoWorkDuration, 0);
   } else {
     if (pomoSession == pomoLongBreakSession)
-      timerSet(longBreakDurationMins, longBreakDurationSecs);
+      timerSet(pomoLongBreakDuration, 0);
     else
-      timerSet(breakDurationMins, breakDurationSecs);
+      timerSet(pomoBreakDuration, 0);
   }
 
   pomoResume();
@@ -91,7 +96,7 @@ void pomoStart() {
 
 void pomoReset() {
   timerPause();
-  timerSet(workDurationMins, workDurationSecs);
+  timerSet(pomoWorkDuration, 0);
 
   ledsSet(0, 0);
 
@@ -103,6 +108,11 @@ void pomoReset() {
 
 
 void pomoShow() {
+  pomoSound = (bool) EEPROM.read(0);
+  pomoWorkDuration = (unsigned int) EEPROM.read(1);
+  pomoBreakDuration = (unsigned int) EEPROM.read(2);
+  pomoLongBreakDuration = (unsigned int) EEPROM.read(3);
+
   pauseStartedAt = millis();
 }
 
